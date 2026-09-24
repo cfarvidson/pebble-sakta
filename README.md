@@ -6,9 +6,16 @@ ticks along the edge, even-hour numerals (00-22) inside them with 12 (noon)
 at the top and 00 (midnight) at the bottom, and one thin grey hand that turns
 once a day.
 
-![](screenshots/emery.png)
+| Cream (default) | White | Black |
+|---|---|---|
+| ![](screenshots/emery.png) | ![](screenshots/emery-white.png) | ![](screenshots/emery-black.png) |
 
-No settings.
+## Settings
+
+Phone app, gear icon on the watchface:
+
+- Dial colour: cream (default), white or black. Black uses white marks and a
+  light grey hand.
 
 ## Build and install
 

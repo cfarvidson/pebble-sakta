@@ -5,8 +5,13 @@
 // ticks along the edge, even-hour numerals inside them with 12 at the top and
 // 00 at the bottom, and one thin grey hand that turns once a day.
 
+#define PKEY_BACKGROUND 1
+
+enum { BG_CREAM = 0, BG_WHITE = 1, BG_BLACK = 2 };
+
 static Window *s_window;
 static Layer  *s_canvas_layer;
+static int     s_background = BG_CREAM;
 
 // Noon = top = 0; midnight = bottom.
 static int32_t minutes_to_angle(int local_min) {
@@ -30,8 +35,12 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   time_t     now   = time(NULL);
   struct tm *local = localtime(&now);
 
-  // Cream dial over the whole screen.
-  graphics_context_set_fill_color(ctx, GColorPastelYellow);
+  // Dial colour over the whole screen; marks and hand follow it.
+  GColor bg   = s_background == BG_BLACK ? GColorBlack
+              : s_background == BG_WHITE ? GColorWhite : GColorPastelYellow;
+  GColor fg   = s_background == BG_BLACK ? GColorWhite : GColorBlack;
+  GColor hand_color = s_background == BG_BLACK ? GColorLightGray : GColorDarkGray;
+  graphics_context_set_fill_color(ctx, bg);
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
   // Quarter-hour ticks along the edge: long on the hour, medium on the half
@@ -42,7 +51,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
     bool on_hour = (i % 4 == 0);
     bool on_half = (i % 2 == 0);
     int  len     = on_hour ? 12 : on_half ? 8 : 4;
-    graphics_context_set_stroke_color(ctx, GColorBlack);
+    graphics_context_set_stroke_color(ctx, fg);
     graphics_context_set_stroke_width(ctx, 1);
     graphics_draw_line(ctx, polar(center, tick_outer, angle),
                             polar(center, tick_outer - len, angle));
@@ -50,7 +59,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 
   // Even-hour numerals inside the ticks, two digits like the slow Mo.
   GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
-  graphics_context_set_text_color(ctx, GColorBlack);
+  graphics_context_set_text_color(ctx, fg);
   for (int h = 0; h < 24; h += 2) {
     GPoint pos = polar(center, radius - 26, minutes_to_angle(h * 60));
     char num_str[3];
@@ -68,16 +77,25 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   GPoint tail   = polar(center, -16, angle);
   GPoint pts[]  = { tip, base_l, tail, base_r };
   GPath *hand   = gpath_create(&(GPathInfo){ .num_points = 4, .points = pts });
-  graphics_context_set_fill_color(ctx, GColorDarkGray);
+  graphics_context_set_fill_color(ctx, hand_color);
   gpath_draw_filled(ctx, hand);
   gpath_destroy(hand);
 
-  graphics_context_set_stroke_color(ctx, GColorDarkGray);
+  graphics_context_set_stroke_color(ctx, hand_color);
   graphics_context_set_stroke_width(ctx, 1);
   graphics_draw_line(ctx, center, tip);
 
-  graphics_context_set_fill_color(ctx, GColorDarkGray);
+  graphics_context_set_fill_color(ctx, hand_color);
   graphics_fill_circle(ctx, center, 7);
+}
+
+static void inbox_received(DictionaryIterator *iter, void *context) {
+  Tuple *t = dict_find(iter, MESSAGE_KEY_BACKGROUND);
+  if (t) {
+    s_background = t->value->int32;
+    persist_write_int(PKEY_BACKGROUND, s_background);
+    layer_mark_dirty(s_canvas_layer);
+  }
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -96,6 +114,8 @@ static void prv_window_unload(Window *window) {
 }
 
 static void prv_init(void) {
+  if (persist_exists(PKEY_BACKGROUND)) s_background = persist_read_int(PKEY_BACKGROUND);
+
   s_window = window_create();
   window_set_window_handlers(s_window, (WindowHandlers) {
     .load   = prv_window_load,
@@ -103,6 +123,8 @@ static void prv_init(void) {
   });
   window_stack_push(s_window, true);
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  app_message_register_inbox_received(inbox_received);
+  app_message_open(64, 32);
 }
 
 static void prv_deinit(void) {
