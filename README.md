@@ -1,9 +1,10 @@
 # Sakta
 
 24-hour one-hand watchface for Pebble Time 2 (emery, 200x228), inspired by
-the slow Jo 17 from slow watches. Cream dial, numerals 0-23 along the edge
-with 12 (noon) at the top and 0 (midnight) at the bottom, quarter-hour ticks
-inside the numerals, and one thin grey hand that turns once a day.
+the slow Jo 17 and slow Mo 02 from slow watches. Cream dial, quarter-hour
+ticks along the edge, even-hour numerals (00-22) inside them with 12 (noon)
+at the top and 00 (midnight) at the bottom, and one thin grey hand that turns
+once a day.
 
 ![](screenshots/emery.png)
 
