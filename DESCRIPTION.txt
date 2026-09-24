@@ -1,0 +1,3 @@
+24-hour watchface with a single hand for Pebble Time 2, inspired by the slow Jo 17. One rotation per day: noon at the top, midnight at the bottom. Cream dial, numerals 0-23 along the edge, quarter-hour ticks, one thin grey hand. Read the time to the nearest few minutes and slow down.
+
+Original design and code, not affiliated with slow watches.

@@ -1,0 +1,24 @@
+{
+  "name": "sakta",
+  "author": "Carl-Fredrik Arvidson",
+  "version": "1.0.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "Sakta",
+    "uuid": "c7e2b9d4-51a6-4f38-b0e7-9a3d6c2f8e15",
+    "sdkVersion": "3",
+    "enableMultiJS": false,
+    "targetPlatforms": [
+      "emery"
+    ],
+    "capabilities": [],
+    "watchapp": {
+      "watchface": true
+    },
+    "resources": {
+      "media": []
+    }
+  }
+}
